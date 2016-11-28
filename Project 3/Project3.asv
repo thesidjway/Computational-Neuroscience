@@ -1,4 +1,11 @@
-%Question no 1: Gaussian Estimation
+%%================================================================%%
+%%  Computational Neuroscience (EC60007) Project 3
+%%
+%%  Siddharth S Jha,  14EE30022
+%%  Adarsh Mukesh,    13BT3
+%%  
+%%================================================================%%
+%%  Question no 1: Gaussian Estimation
 k=zeros(100);
 j=zeros(100);
 
@@ -20,10 +27,13 @@ end
 t=linspace(-50,50,100);
 figure(1)
 plot(t,j);
+
+%%================================================================%%
+%%  Question no 2: PSTH Evaluation
+
 psth=zeros(4,20000);
-%Question no 2: PSTH Evaluation
 for i = 1:4
-    for j = 1:50
+   for j = 1:50
         [m,n]=size(All_Spike_Times{i,j});
         for p = 1:n
             temp=ceil(All_Spike_Times{i,j}(p)*1000);
@@ -31,26 +41,47 @@ for i = 1:4
         end
     end
 end
+
 figure(2)
 %PSTH for 4 neurons
-    ax1=subplot(4,1,1)
+    ax1=subplot(4,1,1);
     plot(1000*psth(1,1:20000),'r');
     xlabel(ax1,'time (ms)');
     ylabel(ax1,'r(t)');
-    ax2=subplot(4,1,2)
+    ax2=subplot(4,1,2);
     plot(1000*psth(2,1:20000));
     xlabel(ax2,'time (ms)');
     ylabel(ax2,'r(t)');
-    ax3=subplot(4,1,3)
+    ax3=subplot(4,1,3);
     plot(1000*psth(3,1:20000),'r');
     xlabel(ax3,'time (ms)');
     ylabel(ax3,'r(t)');
-    ax4=subplot(4,1,4)
+    ax4=subplot(4,1,4);
     plot(1000*psth(4,1:20000));
     xlabel(ax4,'time (ms)');
     ylabel(ax4,'r(t)');
     
-    
+%%================================================================%%
+%%  Question no 3: Poisson or Non-Poisson
+
+bintimes=[10, 20, 50, 100, 200, 500];
+for i = 1:6
+    noofbin(i)=20000/bintimes(i);
+    binfreq(i)=1000/bintimes(i);
+end
+spikes=zeros(4,6);
+for 
+for neur_no=1:4
+    for bin_no=1:6
+        for j = 1:50
+        [m,n]=size(All_Spike_Times{neur_no,j});
+            for p = 1:n
+                temp=ceil(All_Spike_Times{neur_no,j}(p)*binfreq(bin_no));
+                psth(i,temp)=psth(i,temp)+1;
+            end
+        end
+    end
+end
 
 
 
