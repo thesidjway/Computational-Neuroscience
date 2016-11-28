@@ -65,26 +65,44 @@ figure(2)
 %%  Question no 3: Poisson or Non-Poisson
 
 bintimes=[10, 20, 50, 100, 200, 500];
+
 for i = 1:6
     noofbin(i)=20000/bintimes(i);
     binfreq(i)=1000/bintimes(i);
 end
-spikes=zeros(4,6);
-for 
+
+spikes=zeros(4,6,2000);
+
 for neur_no=1:4
-    for bin_no=1:6
+    for freq_no=1:6
         for j = 1:50
         [m,n]=size(All_Spike_Times{neur_no,j});
             for p = 1:n
-                temp=ceil(All_Spike_Times{neur_no,j}(p)*binfreq(bin_no));
-                psth(i,temp)=psth(i,temp)+1;
+                temp=ceil(All_Spike_Times{neur_no,j}(p)*binfreq(freq_no));
+                spikes(neur_no,freq_no,temp)=spikes(neur_no,freq_no,temp)+1;
             end
         end
     end
 end
 
+for neur_no=1:4
+    for freq_no=1:6
+         poissonmat{neur_no,freq_no}=spikes(neur_no,freq_no,1:noofbin(freq_no));
+    end
+end
 
+varmat=[];
+meanmat=[];
 
+for neur_no=1:4
+    for freq_no=1:6
+        meanmat=[meanmat,mean(poissonmat{neur_no,freq_no})];
+        varmat=[varmat,var(poissonmat{neur_no,freq_no})];
+    end
+end
+figure(3)
+scatter(meanmat,varmat,'r') %NEED TO MULTIPLY SOME CONSTANTS TO M
 
-
+%%================================================================%%
+%%  Question no 4: Spike Triggered Average
 

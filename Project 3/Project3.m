@@ -85,10 +85,25 @@ for neur_no=1:4
     end
 end
 
+for neur_no=1:4
+    for freq_no=1:6
+         poissonmat{neur_no,freq_no}=spikes(neur_no,freq_no,1:noofbin(freq_no));
+    end
+end
 
+varmat=[];
+meanmat=[];
 
+for neur_no=1:4
+    for freq_no=1:6
+        meanmat=[meanmat,mean(poissonmat{neur_no,freq_no})];
+        varmat=[varmat,var(poissonmat{neur_no,freq_no})];
+    end
+end
+figure(3)
+scatter(meanmat,varmat,'r') %NEED TO MULTIPLY SOME CONSTANTS TO MAKE VARIANCE OKAY
 
-
-
+%%================================================================%%
+%%  Question no 4: Spike Triggered Average
 
 
