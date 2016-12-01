@@ -12,11 +12,11 @@ j=zeros(100);
 for i = -49:50
     if(i>0)
     for l=1:20000-i
-        j(i+49)=j(i+49)+(Stimulus(l)*Stimulus(l+i));
+        j(i+50)=j(i+50)+(Stimulus(l)*Stimulus(l+i));
     end
-    j(i+49)=j(i+49)/(20000-i);
+    j(i+50)=j(i+50)/(20000-i);
     end
-    if (i<0)
+    if (i<=0)
     for l=-1*i+1:20000
         j(i+50)=j(i+50)+(Stimulus(l)*Stimulus(l+i));
     end
