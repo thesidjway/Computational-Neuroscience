@@ -72,9 +72,17 @@ for i = 1:6
 end
 
 spikes=zeros(4,6,2000);
+for neur_no=1:4
+    for freq_no=1:6
+        for iter = 1:20000
+            poissonmat{neur_no,freq_no,iter}=0;
+        end
+    end
+end
 
 varmat=[];
 meanmat=[];
+
 for neur_no=1:4
     for freq_no=1:6
         for j = 1:50
@@ -83,13 +91,22 @@ for neur_no=1:4
                 temp=ceil(All_Spike_Times{neur_no,j}(p)*binfreq(freq_no));
                 spikes(neur_no,freq_no,temp)=spikes(neur_no,freq_no,temp)+1;
             end
-            poissonmat{neur_no,freq_no}=spikes(neur_no,freq_no,1:noofbin(freq_no));
-            varmat(neur_no,freq_no,j)=  var(poissonmat{neur_no,freq_no});
-            meanmat(neur_no,freq_no,j)= mean(poissonmat{neur_no,freq_no});
+%             poissonmat{neur_no,freq_no}=spikes(neur_no,freq_no,1:noofbin(freq_no));
+            for o=1:noofbin(freq_no)
+                for b=bintimes(freq_no)*o-bintimes(freq_no)+1:bintimes(freq_no)*o
+                    poissonmat{neur_no,freq_no,b}=spikes(neur_no,freq_no,o);
+                end
+%                     poissonmat{neur_no,freq_no,10*o}=spikes(neur_no,freq_no,o);
+            end
+            spikes=zeros(4,6,2000);
+            varmat(neur_no,freq_no,j)=  var([poissonmat{neur_no,freq_no,:}]);
+            meanmat(neur_no,freq_no,j)= mean([poissonmat{neur_no,freq_no,:}]);
         end
     end
 end
-figure(4)
+
+
+figure(3) %for 10ms
 subplot(2,2,1)
 scatter(varmat(1,1,:),meanmat(1,1,:))
 subplot(2,2,2)
@@ -99,25 +116,58 @@ scatter(varmat(3,1,:),meanmat(3,1,:))
 subplot(2,2,4)
 scatter(varmat(4,1,:),meanmat(4,1,:))
 
-% for neur_no=1:4
-%     for freq_no=1:6
-%          poissonmat{neur_no,freq_no}=spikes(neur_no,freq_no,1:noofbin(freq_no));
-%     end
-% end
+figure(4) %for 20ms
+subplot(2,2,1)
+scatter(varmat(1,2,:),meanmat(1,2,:))
+subplot(2,2,2)
+scatter(varmat(2,2,:),meanmat(2,2,:))
+subplot(2,2,3)
+scatter(varmat(3,2,:),meanmat(3,2,:))
+subplot(2,2,4)
+scatter(varmat(4,2,:),meanmat(4,2,:))
+
+figure(5) %for 50ms
+subplot(2,2,1)
+scatter(varmat(1,3,:),meanmat(1,3,:))
+subplot(2,2,2)
+scatter(varmat(2,3,:),meanmat(2,3,:))
+subplot(2,2,3)
+scatter(varmat(3,3,:),meanmat(3,3,:))
+subplot(2,2,4)
+scatter(varmat(4,3,:),meanmat(4,3,:))
+
+figure(6) %for 100ms
+subplot(2,2,1)
+scatter(varmat(1,4,:),meanmat(1,4,:))
+subplot(2,2,2)
+scatter(varmat(2,4,:),meanmat(2,4,:))
+subplot(2,2,3)
+scatter(varmat(3,4,:),meanmat(3,4,:))
+subplot(2,2,4)
+scatter(varmat(4,4,:),meanmat(4,4,:))
+
+figure(7) %for 200ms
+subplot(2,2,1)
+scatter(varmat(1,5,:),meanmat(1,5,:))
+subplot(2,2,2)
+scatter(varmat(2,5,:),meanmat(2,5,:))
+subplot(2,2,3)
+scatter(varmat(3,5,:),meanmat(3,5,:))
+subplot(2,2,4)
+scatter(varmat(4,5,:),meanmat(4,5,:))
 
 
-% 
+figure(8) %for 500ms
+subplot(2,2,1)
+scatter(varmat(1,6,:),meanmat(1,6,:))
+subplot(2,2,2)
+scatter(varmat(2,6,:),meanmat(2,6,:))
+subplot(2,2,3)
+scatter(varmat(3,6,:),meanmat(3,6,:))
+subplot(2,2,4)
+scatter(varmat(4,6,:),meanmat(4,6,:))
 
-% 
-% for neur_no=1:4
-%     for freq_no=1:6
-%         meanmat=[meanmat,mean(poissonmat{neur_no,freq_no})];
-%         varmat=[varmat,var(poissonmat{neur_no,freq_no})];
-%     end
-% end
-% figure(3)
-% scatter(meanmat,varmat,'r') %NEED TO MULTIPLY SOME CONSTANTS TO MAKE VARIANCE OKAY
-% 
+
 % %%================================================================%%
 % %%  Question no 4: Spike Triggered Average
 

@@ -84,9 +84,14 @@ for neur_no=1:4
                 temp=ceil(All_Spike_Times{neur_no,j}(p)*binfreq(freq_no));
                 spikes(neur_no,freq_no,temp)=spikes(neur_no,freq_no,temp)+1;
             end
-            poissonmat{neur_no,freq_no}=spikes(neur_no,freq_no,1:noofbin(freq_no));
-            varmat(neur_no,freq_no,j)=  var(poissonmat{neur_no,freq_no});
-            meanmat(neur_no,freq_no,j)= mean(poissonmat{neur_no,freq_no});
+%             poissonmat{neur_no,freq_no}=spikes(neur_no,freq_no,1:noofbin(freq_no));
+            for o=1:noofbin(freq_no)
+                for b=bintimes(freq_no)*o-bintimes(freq_no)+1:bintimes(freq_no)*o
+                    poissonmat{neur_no,freq_no,bintimes(freq_no)*o}=spikes(neur_no,freq_no,o);
+                end
+            end
+            varmat(neur_no,freq_no,j)=  var([poissonmat{neur_no,freq_no,:}]);
+            meanmat(neur_no,freq_no,j)= mean([poissonmat{neur_no,freq_no,:}]);
         end
     end
 end
