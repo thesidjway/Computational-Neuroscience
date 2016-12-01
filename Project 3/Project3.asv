@@ -98,7 +98,7 @@ for neur_no=1:4
                 end
 %                     poissonmat{neur_no,freq_no,10*o}=spikes(neur_no,freq_no,o);
             end
-            spikes=zeros(4,6,2000);
+            spikes=zeros(4,6,20000);
             varmat(neur_no,freq_no,j)=  var([poissonmat{neur_no,freq_no,:}]);
             meanmat(neur_no,freq_no,j)= mean([poissonmat{neur_no,freq_no,:}]);
         end
@@ -168,9 +168,38 @@ subplot(2,2,4)
 scatter(varmat(4,6,:),meanmat(4,6,:))
 
 
-% %%================================================================%%
-% %%  Question no 4: Spike Triggered Average
+%%================================================================%%
+%%  Question no 4: Spike Triggered Average
+averagemat=zeros(4,100);
+staspikes=zeros(4,1,200);
+Stim15=Stimulus(1:15000);
 
+for neur_no=1:4
+    n_spikes=0;
+    for j=1:50
+        v=[];
+        v=All_Spike_Times{neur_no,j}<15;
+        newspike15=All_Spike_Times{neur_no,j}(v)
+        [m,n]=size(newspike15);
+        n_spikes=n_spikes+n;
+        for spk_no=1:n
+            for tim=1:100
+                averagemat(neur_no,tim)= averagemat(neur_no,tim)+Stim15(max(1,ceil(1000*(newspike15(spk_no)))-tim));
+            end
+        end
+    end
+    for tim=1:100
+        averagemat(neur_no,tim)= averagemat(neur_no,tim)/n_spikes;
+    end
+end
 
-
-
+figure(9)
+subplot(2,2,1)
+plot(averagemat(1,:));
+subplot(2,2,2)
+plot(averagemat(2,:));
+subplot(2,2,3)
+plot(averagemat(3,:));
+subplot(2,2,4)
+plot(averagemat(4,:));
+        
