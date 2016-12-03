@@ -174,12 +174,13 @@ averagemat=zeros(4,100);
 staspikes=zeros(4,1,200);
 Stim15=Stimulus(1:15000);
 
+mean_rate=zeros(4);
 for neur_no=1:4
     n_spikes=0;
     for j=1:50
         v=[];
         v=All_Spike_Times{neur_no,j}<15;
-        newspike15=All_Spike_Times{neur_no,j}(v)
+        newspike15=All_Spike_Times{neur_no,j}(v);
         [m,n]=size(newspike15);
         n_spikes=n_spikes+n;
         for spk_no=1:n
@@ -188,22 +189,85 @@ for neur_no=1:4
             end
         end
     end
+    mean_rate(neur_no)=n_spikes/750;
     for tim=1:100
         averagemat(neur_no,tim)= averagemat(neur_no,tim)/n_spikes;
     end
 end
 
-figure(9)
-subplot(2,2,1)
 
-plot(averagemat(1,:));
-ylim([-0.2 0.2]);
+% plot(averagemat(1,:));
+% ylim([-0.2 0.2]);
+% subplot(2,2,2)
+% plot(averagemat(2,:));
+% ylim([-0.2 0.2]);
+% subplot(2,2,3)
+% plot(averagemat(3,:));
+% ylim([-0.2 0.2]);
+% subplot(2,2,4)
+% plot(averagemat(4,:));
+% ylim([-0.2 0.2]);
+
+corr_new=zeros(101);
+for i = 0:100
+    for l=1:20000-i
+        corr_new(i+1)=corr_new(i+1)+(Stimulus(l)*Stimulus(l+i));
+    end
+    corr_new(i+1)=corr_new(i+1)/(20000-i);
+end
+figure(4)
+plot(corr_new);
+corr_mat=zeros(100,100);
+
+for row=1:100
+    for col=1:100
+        corr_mat(row,col)=corr_new(abs(row-col)+1);
+    end
+end
+cssinv=inv(corr_mat);
+ratenew=mean_rate(:,1);
+corrected_averagemat=cssinv*transpose(averagemat);
+
+for i =1:4
+    corrected_averagemat(:,i)=corrected_averagemat(:,i)*ratenew(i)
+end
+
+
+figure(5)
+subplot(2,2,1)
+plot(corrected_averagemat(:,1));
 subplot(2,2,2)
-plot(averagemat(2,:));
-ylim([-0.2 0.2]);
+plot(corrected_averagemat(:,2));
 subplot(2,2,3)
-plot(averagemat(3,:));
-ylim([-0.2 0.2]);
+plot(corrected_averagemat(:,3));
 subplot(2,2,4)
-plot(averagemat(4,:));
-ylim([-0.2 0.2]);
+plot(corrected_averagemat(:,4));
+
+%%================================================================%%
+% %%  Question no 5: Output nonlinearity
+% 
+% diagvar=zeros(100,100);
+% for i=1:100
+%     for j=1:100
+%         if(i==j)
+%             diagvar(i,i)=0.33;
+%         end
+%     end
+% end
+% 
+% cssinv=inv(diagvar);
+% 
+% corrected_averagemat=cssinv*transpose(averagemat);%*mean_rate(:,1)
+% 
+% for i =1:4
+%     corrected_averagemat(:,i)=corrected_averagemat(:,i)*ratenew(i)
+% end
+% figure(1)
+% subplot(2,2,1)
+% plot(corrected_averagemat(:,1));
+% subplot(2,2,2)
+% plot(corrected_averagemat(:,2));
+% subplot(2,2,3)
+% plot(corrected_averagemat(:,3));
+% subplot(2,2,4)
+% plot(corrected_averagemat(:,4));
