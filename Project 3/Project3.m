@@ -44,7 +44,6 @@ for i = 1:4
         end
     end
 end
-
 figure(2)
 %PSTH for 4 neurons
     ax1=subplot(4,1,1);
@@ -63,7 +62,12 @@ figure(2)
     plot(1000*psth(4,1:20000));
     xlabel(ax4,'time (ms)');
     ylabel(ax4,'r(t)');
-    
+smallpsth=zeros(4,100);    
+for i = 1:100
+    for neur_no=1:4
+        smallpsth(neur_no,i)=mean(psth(neur_no,i*150-149:150*i));
+    end
+end
 %%================================================================%%
 %%  Question no 3: Poisson or Non-Poisson
 
@@ -175,7 +179,7 @@ scatter(varmat(4,6,:),meanmat(4,6,:))
 %%  Question no 4: Spike Triggered Average
 averagemat=zeros(4,100);
 staspikes=zeros(4,1,200);
-Stim15=Stimulus(1:15000);
+Stim15=Stimulus(1:15100);
 
 mean_rate=zeros(4);
 for neur_no=1:4
@@ -212,7 +216,7 @@ subplot(2,2,4)
 plot(averagemat(4,:));
 ylim([-0.2 0.2]);
 
-%%
+%% Whitened STA
 corr_new=zeros(101);
 for i = 0:100
     for l=1:20000-i
@@ -237,6 +241,21 @@ for i =1:4
     corrected_averagemat(:,i)=corrected_averagemat(:,i)*ratenew(i);
 end
 
+%% Question 5: Nonlinearity
+conv=zeros(4,15000);
+for neur_no=1:4
+    for tau=1:15000
+        conv(neur_no,tau)=(Stim15(tau:tau+99))*corrected_averagemat(:,neur_no);
+    end
+end
+smallconv=zeros(4,100);
+for i = 1:100
+    for neur_no=1:4
+        smallconv(neur_no,i)=mean(conv(neur_no,i*150-149:150*i));
+    end
+end
+
+        
 
 figure(11)
 subplot(2,2,1)
@@ -248,7 +267,18 @@ plot(corrected_averagemat(:,3));
 subplot(2,2,4)
 plot(corrected_averagemat(:,4));
 
-%================================================================%%
+figure(12)
+subplot(2,2,1)
+scatter(smallpsth(1,:),smallconv(1,:));  
+subplot(2,2,2)
+scatter(smallpsth(2,:),smallconv(2,:));  
+subplot(2,2,3)
+scatter(smallpsth(3,:),smallconv(3,:));  
+subplot(2,2,4)
+scatter(smallpsth(4,:),smallconv(4,:));  
+
+
+================================================================%%
 %%  Question: Victor Purpura Distance
 num_trial=10;
 MI=zeros(num_trial,7);
@@ -316,7 +346,7 @@ for vp_trial=1:num_trial
 end
 MIavg=sum(MI(:,:));
 MIavg=MIavg/num_trial;
-figure(12)
+figure(13)
 plot(linspace(-3,2,6),MIavg(2:7));
 end
 
