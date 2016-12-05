@@ -1,3 +1,6 @@
+
+function CNProject()
+load('CN_Project3_2016.mat');
 %%================================================================%%
 %%  Computational Neuroscience (EC60007) Project 3
 %%
@@ -195,19 +198,21 @@ for neur_no=1:4
     end
 end
 
+figure(9)
+subplot(2,2,1)
+plot(averagemat(1,:));
+ylim([-0.2 0.2]);
+subplot(2,2,2)
+plot(averagemat(2,:));
+ylim([-0.2 0.2]);
+subplot(2,2,3)
+plot(averagemat(3,:));
+ylim([-0.2 0.2]);
+subplot(2,2,4)
+plot(averagemat(4,:));
+ylim([-0.2 0.2]);
 
-% plot(averagemat(1,:));
-% ylim([-0.2 0.2]);
-% subplot(2,2,2)
-% plot(averagemat(2,:));
-% ylim([-0.2 0.2]);
-% subplot(2,2,3)
-% plot(averagemat(3,:));
-% ylim([-0.2 0.2]);
-% subplot(2,2,4)
-% plot(averagemat(4,:));
-% ylim([-0.2 0.2]);
-
+%%
 corr_new=zeros(101);
 for i = 0:100
     for l=1:20000-i
@@ -215,7 +220,7 @@ for i = 0:100
     end
     corr_new(i+1)=corr_new(i+1)/(20000-i);
 end
-figure(4)
+figure(10)
 plot(corr_new);
 corr_mat=zeros(100,100);
 
@@ -229,13 +234,13 @@ ratenew=mean_rate(:,1);
 corrected_averagemat=cssinv*transpose(averagemat);
 
 for i =1:4
-    corrected_averagemat(:,i)=corrected_averagemat(:,i)*ratenew(i)
+    corrected_averagemat(:,i)=corrected_averagemat(:,i)*ratenew(i);
 end
 
 
-figure(5)
+figure(11)
 subplot(2,2,1)
-plot(corrected_averagemat(:,1));
+plot(corrected_averagemat(:,1));  
 subplot(2,2,2)
 plot(corrected_averagemat(:,2));
 subplot(2,2,3)
@@ -243,31 +248,92 @@ plot(corrected_averagemat(:,3));
 subplot(2,2,4)
 plot(corrected_averagemat(:,4));
 
-%%================================================================%%
-% %%  Question no 5: Output nonlinearity
-% 
-% diagvar=zeros(100,100);
-% for i=1:100
-%     for j=1:100
-%         if(i==j)
-%             diagvar(i,i)=0.33;
-%         end
-%     end
-% end
-% 
-% cssinv=inv(diagvar);
-% 
-% corrected_averagemat=cssinv*transpose(averagemat);%*mean_rate(:,1)
-% 
-% for i =1:4
-%     corrected_averagemat(:,i)=corrected_averagemat(:,i)*ratenew(i)
-% end
-% figure(1)
-% subplot(2,2,1)
-% plot(corrected_averagemat(:,1));
-% subplot(2,2,2)
-% plot(corrected_averagemat(:,2));
-% subplot(2,2,3)
-% plot(corrected_averagemat(:,3));
-% subplot(2,2,4)
-% plot(corrected_averagemat(:,4));
+%================================================================%%
+%%  Question: Victor Purpura Distance
+
+start_pt=[1,3,5,7,9,11,13,15];
+q=[0, 0.001, 0.01, 0.1, 1, 10, 100];
+end_pt=start_pt+100;
+
+
+for trial_no = 1:50
+    for stpt=1:8
+        temp1=[];
+        temp1=All_Spike_Times{1,trial_no}>start_pt(stpt);
+        spktemp1=All_Spike_Times{1,trial_no}(temp1);
+        temp2=[];
+        temp2=All_Spike_Times{1,trial_no}<=start_pt(stpt)+0.1;
+        spktemp2=All_Spike_Times{1,trial_no}(temp2);
+        vpmat{stpt,trial_no}=intersect(spktemp1,spktemp2);
+    end
+end
+confusion=zeros(7,8,8);
+vpmindist=zeros(8,50);
+vpmindist=inf+vpmindist;
+for qno=1:7
+    for m=1:50
+        for n=1:8
+            minj=[];
+            for i = 1:50
+                for j = 1:8
+                    if ~(m==i && n==j)
+                        if(spkd(vpmat{j,i},vpmat{n,m},q(qno))<=vpmindist(n,m))
+                            vpmindist(n,m)=spkd(vpmat{j,i},vpmat{n,m},q(qno));
+                            if(spkd(vpmat{j,i},vpmat{n,m},q(qno))==vpmindist(n,m))
+                                minj=[minj,j];
+                            else
+                                minj=[j];
+                            end
+
+                        end
+    %                     vpdist(n,m)=min(a,vpdist(m,n));
+                    end
+                end
+            end
+            for it=1:length(minj)
+                confusion(qno,n,minj(it))=confusion(qno,n,minj(it))+1/length(minj);
+            end
+        end
+    end
+end
+confusion=confusion/400
+end
+
+function d=spkd(tli,tlj,cost)
+%
+% d=spkd(tli,tlj,cost) calculates the "spike time" distance
+% (Victor & Purpura 1996) for a single cost
+%
+% tli: vector of spike times for first spike train
+% tlj: vector of spike times for second spike train
+% cost: cost per unit time to move a spike
+%
+%  Copyright (c) 1999 by Daniel Reich and Jonathan Victor.
+%  Translated to Matlab by Daniel Reich from FORTRAN code by Jonathan Victor.
+%
+nspi=length(tli);
+nspj=length(tlj);
+
+if cost==0
+   d=abs(nspi-nspj);
+   return
+elseif cost==Inf
+   d=nspi+nspj;
+   return
+end
+
+scr=zeros(nspi+1,nspj+1);
+%
+%     INITIALIZE MARGINS WITH COST OF ADDING A SPIKE
+%
+scr(:,1)=(0:nspi)';
+scr(1,:)=(0:nspj);
+if nspi & nspj
+   for i=2:nspi+1
+      for j=2:nspj+1
+         scr(i,j)=min([scr(i-1,j)+1 scr(i,j-1)+1 scr(i-1,j-1)+cost*abs(tli(i-1)-tlj(j-1))]);
+      end
+   end
+end
+d=scr(nspi+1,nspj+1);
+end

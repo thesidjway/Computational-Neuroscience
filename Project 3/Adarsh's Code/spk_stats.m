@@ -1,5 +1,5 @@
 %% load and autocorr
-load('CN_Project3_2016.mat');
+load('../CN_Project3_2016.mat');
 trn_stm=Stimulus(1,1:15000);
 test_stm=Stimulus(1,15001:end);
 for i=1:4
