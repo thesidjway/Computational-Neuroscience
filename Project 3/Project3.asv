@@ -250,54 +250,78 @@ plot(corrected_averagemat(:,4));
 
 %================================================================%%
 %%  Question: Victor Purpura Distance
+num_trial=5;
+MI=zeros(num_trial,7);
+for vp_trial=1:num_trial
+    
+    q=[0, 0.001, 0.01, 0.1, 1, 10, 100];
+    rng(vp_trial);
+    start_pt=rand(1,8);
+    start_pt=start_pt*15000;
+    end_pt=start_pt+100;
 
-start_pt=[1,3,5,7,9,11,13,15];
-q=[0, 0.001, 0.01, 0.1, 1, 10, 100];
-end_pt=start_pt+100;
 
-
-for trial_no = 1:50
-    for stpt=1:8
-        temp1=[];
-        temp1=All_Spike_Times{1,trial_no}>start_pt(stpt);
-        spktemp1=All_Spike_Times{1,trial_no}(temp1);
-        temp2=[];
-        temp2=All_Spike_Times{1,trial_no}<=start_pt(stpt)+0.1;
-        spktemp2=All_Spike_Times{1,trial_no}(temp2);
-        vpmat{stpt,trial_no}=intersect(spktemp1,spktemp2);
+    for trial_no = 1:50
+        for stpt=1:8
+            temp1=[];
+            temp1=All_Spike_Times{1,trial_no}>start_pt(stpt);
+            spktemp1=All_Spike_Times{1,trial_no}(temp1);
+            temp2=[];
+            temp2=All_Spike_Times{1,trial_no}<=start_pt(stpt)+0.1;
+            spktemp2=All_Spike_Times{1,trial_no}(temp2);
+            vpmat{stpt,trial_no}=intersect(spktemp1,spktemp2);
+        end
     end
-end
-confusion=zeros(8,8);
-vpmindist=zeros(8,50);
-vpmindist=inf+vpmindist;
-for m=1:50
-    for n=1:8
-        minj=[];
-        for i = 1:50
-            for j = 1:8
-                if ~(m==i && n==j)
-                    if(spkd(vpmat{j,i},vpmat{n,m},1)<=vpmindist(n,m))
-                        vpmindist(n,m)=spkd(vpmat{j,i},vpmat{n,m},1);
-                        if(spkd(vpmat{j,i},vpmat{n,m},1)==vpmindist(n,m))
-                            minj=[minj,j];
-                        else
-                            minj=[j];
+    confusion=zeros(7,8,8);
+
+    for qno=1:7
+        vpmindist=zeros(8,50);
+        vpmindist=inf+vpmindist;
+        for m=1:50
+            for n=1:8
+                minj=[];
+                for i = 1:50
+                    for j = 1:8
+                        if ~(m==i && n==j)
+                            if(spkd(vpmat{j,i},vpmat{n,m},q(qno))<=vpmindist(n,m))
+                                vpmindist(n,m)=spkd(vpmat{j,i},vpmat{n,m},q(qno));
+                                if(spkd(vpmat{j,i},vpmat{n,m},q(qno))==vpmindist(n,m))
+                                    minj=[minj,j];
+                                else
+                                    minj=[j];
+                                end
+
+                            end
+        %                     vpdist(n,m)=min(a,vpdist(m,n));
                         end
-                        
                     end
-%                     vpdist(n,m)=min(a,vpdist(m,n));
+                end
+                for it=1:length(minj)
+                    confusion(qno,n,minj(it))=confusion(qno,n,minj(it))+1/length(minj);
                 end
             end
         end
-        for it=1:size(minj)
-            confusion(n,minj(it))=confusion(n,it)+1;
+
+
+
+    end
+    vp_trial
+    confusion=confusion/400;
+    for qno=1:7
+        for x = 1:8
+                for y=  1:8
+                    
+                    MI(2,qno)=MI(vp_trial,qno)+confusion(qno,x,y)*log2(confusion(qno,x,y)/(sum(confusion(qno,x,:))*sum(confusion(qno,:,y))));
+                end
         end
     end
 end
-confusion
+MI
 end
 
 
+
+        
 function d=spkd(tli,tlj,cost)
 %
 % d=spkd(tli,tlj,cost) calculates the "spike time" distance
