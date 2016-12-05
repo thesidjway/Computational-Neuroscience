@@ -44,7 +44,6 @@ for i = 1:4
         end
     end
 end
-
 figure(2)
 %PSTH for 4 neurons
     ax1=subplot(4,1,1);
@@ -63,7 +62,12 @@ figure(2)
     plot(1000*psth(4,1:20000));
     xlabel(ax4,'time (ms)');
     ylabel(ax4,'r(t)');
-    
+smallpsth=zeros(4,100);    
+for i = 1:100
+    for neur_no=1:4
+        smallpsth(neur_no,i)=mean(psth(neur_no,i*150-149:150*i));
+    end
+end
 %%================================================================%%
 %%  Question no 3: Poisson or Non-Poisson
 
@@ -213,7 +217,6 @@ plot(averagemat(4,:));
 ylim([-0.2 0.2]);
 
 %% Whitened STA
-global corrected_averagemat
 corr_new=zeros(101);
 for i = 0:100
     for l=1:20000-i
@@ -245,21 +248,14 @@ for neur_no=1:4
         conv(neur_no,tau)=(Stim15(tau:tau+99))*corrected_averagemat(:,neur_no);
     end
 end
-smallconv=zero(4,100);
-for i = 1:length(conv(1))
+smallconv=zeros(4,100);
+for i = 1:100
     for neur_no=1:4
-        smallconv(neur_no,tau)=mean(co
+        smallconv(neur_no,i)=mean(conv(neur_no,i*150-149:150*i));
+    end
+end
+
         
-    
-figure(11)
-subplot(2,2,1)
-scatter(conv(1),corrected_averagemat(1)); 
-subplot(2,2,2)
-plot(corrected_averagemat(:,2));
-subplot(2,2,3)
-plot(corrected_averagemat(:,3));
-subplot(2,2,4)
-plot(corrected_averagemat(:,4));
 
 figure(11)
 subplot(2,2,1)
@@ -271,78 +267,87 @@ plot(corrected_averagemat(:,3));
 subplot(2,2,4)
 plot(corrected_averagemat(:,4));
 
+figure(12)
+subplot(2,2,1)
+scatter(smallpsth(1,:),smallconv(1,:),1);  
+subplot(2,2,2)
+scatter(smallpsth(2,:),smallconv(2,:),1);  
+subplot(2,2,3)
+scatter(smallpsth(3,:),smallconv(3,:),1);  
+subplot(2,2,4)
+scatter(smallpsth(4,:),smallconv(4,:),1);  
 
 
-%================================================================%%
-% %%  Question: Victor Purpura Distance
-% num_trial=10;
-% MI=zeros(num_trial,7);
-% for vp_trial=1:num_trial
-%     q=[0, 0.001, 0.01, 0.1, 1, 10, 100];
-%     rng(vp_trial);
-%     start_pt=rand(1,8);
-%     start_pt=start_pt*15;
-%     end_pt=start_pt+0.1;
-% 
-% 
-%     for trial_no = 1:50
-%         for stpt=1:8
-%             temp1=[];
-%             temp1=All_Spike_Times{1,trial_no}>start_pt(stpt);
-%             spktemp1=All_Spike_Times{1,trial_no}(temp1);
-%             temp2=[];
-%             temp2=All_Spike_Times{1,trial_no}<=start_pt(stpt)+0.1;
-%             spktemp2=All_Spike_Times{1,trial_no}(temp2);
-%             vpmat{stpt,trial_no}=intersect(spktemp1,spktemp2);
-%         end
-%     end
-%     
-%     confusion=zeros(7,8,8);
-% 
-%     for qno=1:7
-%         vpmindist=zeros(8,50);
-%         vpmindist=inf+vpmindist;
-%         for m=1:50
-%             for n=1:8
-%                 minj=[];
-%                 for i = 1:50
-%                     for j = 1:8
-%                         if ~(m==i && n==j)
-%                             if(spkd(vpmat{j,i},vpmat{n,m},q(qno))<=vpmindist(n,m))
-%                                 vpmindist(n,m)=spkd(vpmat{j,i},vpmat{n,m},q(qno));
-%                                 if(spkd(vpmat{j,i},vpmat{n,m},q(qno))==vpmindist(n,m))
-%                                     minj=[minj,j];
-%                                 else
-%                                     minj=[j];
-%                                 end
-% 
-%                             end
-%         %                     vpdist(n,m)=min(a,vpdist(m,n));
-%                         end
-%                     end
-%                 end
-%                 for it=1:length(minj)
-%                     confusion(qno,n,minj(it))=confusion(qno,n,minj(it))+1/length(minj);
-%                 end
-%             end
-%         end
-% 
-% 
-% 
-%     end
-%     confusion=confusion/400;
-%     for qno=1:7
-%         for x = 1:8
-%                 for y=  1:8
-%                     MI(vp_trial,qno)=MI(vp_trial,qno)+confusion(qno,x,y)*log2(confusion(qno,x,y)/(sum(confusion(qno,x,:))*sum(confusion(qno,:,y))));
-%                 end
-%         end
-%     end
-% end
-% MIavg=sum(MI(:,:));
-% MIavg=MIavg/num_trial;
-% figure(12)
-% plot(linspace(-3,2,6),MIavg(2:7));
+%%=============================================================%%
+%%  Question: Victor Purpura Distance
+num_trial=10;
+MI=zeros(num_trial,7);
+for vp_trial=1:num_trial
+    q=[0, 0.001, 0.01, 0.1, 1, 10, 100];
+    rng(vp_trial);
+    start_pt=rand(1,8);
+    start_pt=start_pt*15;
+    end_pt=start_pt+0.1;
+
+
+    for trial_no = 1:50
+        for stpt=1:8
+            temp1=[];
+            temp1=All_Spike_Times{1,trial_no}>start_pt(stpt);
+            spktemp1=All_Spike_Times{1,trial_no}(temp1);
+            temp2=[];
+            temp2=All_Spike_Times{1,trial_no}<=start_pt(stpt)+0.1;
+            spktemp2=All_Spike_Times{1,trial_no}(temp2);
+            vpmat{stpt,trial_no}=intersect(spktemp1,spktemp2);
+        end
+    end
+    
+    confusion=zeros(7,8,8);
+
+    for qno=1:7
+        vpmindist=zeros(8,50);
+        vpmindist=inf+vpmindist;
+        for m=1:50
+            for n=1:8
+                minj=[];
+                for i = 1:50
+                    for j = 1:8
+                        if ~(m==i && n==j)
+                            if(spkd(vpmat{j,i},vpmat{n,m},q(qno))<=vpmindist(n,m))
+                                vpmindist(n,m)=spkd(vpmat{j,i},vpmat{n,m},q(qno));
+                                if(spkd(vpmat{j,i},vpmat{n,m},q(qno))==vpmindist(n,m))
+                                    minj=[minj,j];
+                                else
+                                    minj=[j];
+                                end
+
+                            end
+        %                     vpdist(n,m)=min(a,vpdist(m,n));
+                        end
+                    end
+                end
+                for it=1:length(minj)
+                    confusion(qno,n,minj(it))=confusion(qno,n,minj(it))+1/length(minj);
+                end
+            end
+        end
+
+
+
+    end
+    confusion=confusion/400;
+    for qno=1:7
+        for x = 1:8
+                for y=  1:8
+                    MI(vp_trial,qno)=MI(vp_trial,qno)+confusion(qno,x,y)*log2(confusion(qno,x,y)/(sum(confusion(qno,x,:))*sum(confusion(qno,:,y))));
+                end
+        end
+    end
+end
+MIavg=sum(MI(:,:));
+MIavg=MIavg/num_trial;
+figure(13)
+plot(linspace(-3,2,6),MIavg(2:7));
 end
 
 
